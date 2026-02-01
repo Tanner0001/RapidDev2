@@ -1,23 +1,16 @@
 
 public enum Faction
 {
-    CoastGuard,
-    Civilian,
-    Smuggler,
-    HostileMilitary
+    None,
+    Player,
+    Enemy,
+    Civilian
 }
 
 public enum UnitState
 {
     Idle,
     Moving,
-    Patrolling,  // New state for following a lane
-    Scanning     // Stationary, performing action
-}
-
-public enum ThreatLevel
-{
-    Unknown, // Grey
-    Green,   // Clear
-    Red      // Hostile
+    Patrolling,
+    Attacking
 }

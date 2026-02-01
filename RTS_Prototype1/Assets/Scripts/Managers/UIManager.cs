@@ -1,83 +1,98 @@
 using UnityEngine;
 using TMPro;
-using System.Collections;
 
 public class UIManager : MonoBehaviour
 {
     public static UIManager Instance { get; private set; }
 
-    [SerializeField] private TextMeshProUGUI statusText;
-    [SerializeField] private TextMeshProUGUI selectedShipStatusText; // For real-time state
-    [SerializeField] private float displayTime = 3f;
+    [Header("Game State UI")]
+    [SerializeField] private TextMeshProUGUI creditsText;
+    [SerializeField] private TextMeshProUGUI nationHealthText;
 
-    private Coroutine _displayCoroutine;
+    [Header("Selection & Upgrades")]
+    [SerializeField] private GameObject upgradePanel;
+    [SerializeField] private TextMeshProUGUI selectedUnitText;
+
+    [Header("Game Over UI")]
+    [SerializeField] private GameObject gameOverPanel;
 
     void Awake()
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("UIManager: Duplicate UIManager found, destroying this one.", this);
             Destroy(gameObject);
             return;
         }
         Instance = this;
-        
-        if (statusText == null)
-        {
-            Debug.LogError("UIManager: StatusText is not assigned in the inspector!", this);
-        }
-        if (selectedShipStatusText == null)
-        {
-            Debug.LogError("UIManager: SelectedShipStatusText is not assigned in the inspector!", this);
-        }
 
-        if (statusText != null) statusText.text = ""; // Start with empty text
-        if (selectedShipStatusText != null) selectedShipStatusText.text = "Status: None";
+        // Disable panels by default
+        if(upgradePanel != null) upgradePanel.SetActive(false);
+        if(gameOverPanel != null) gameOverPanel.SetActive(false);
     }
 
-    /// <summary>
-    /// Displays a temporary status message after a hail/scan.
-    /// </summary>
-    public void DisplayShipStatus(Transform shipTransform, ThreatLevel threatLevel)
+    void OnEnable()
     {
-        Debug.Log($"UIManager: Received request to display status for {shipTransform.name} with threat {threatLevel}.");
-        if (_displayCoroutine != null)
+        if (GameManager.Instance != null)
         {
-            StopCoroutine(_displayCoroutine);
-        }
-        _displayCoroutine = StartCoroutine(DisplayStatusCoroutine(shipTransform, threatLevel));
-    }
-
-    /// <summary>
-    /// Updates the persistent status display for the currently selected ship.
-    /// </summary>
-    public void UpdateSelectedShipStatus(string shipName, UnitState currentState)
-    {
-        if (selectedShipStatusText != null)
-        {
-            selectedShipStatusText.text = $"Ship Selected: {shipName} - Status: {currentState}";
-        }
-    }
-    
-    public void ClearSelectedShipStatus()
-    {
-        if (selectedShipStatusText != null)
-        {
-            selectedShipStatusText.text = "No Ship Selected";
+            GameManager.Instance.OnCreditsChanged += UpdateCreditsText;
+            GameManager.Instance.OnNationHealthChanged += UpdateNationHealthText;
+            GameManager.Instance.OnGameOver += ShowGameOverPanel;
         }
     }
 
-    private IEnumerator DisplayStatusCoroutine(Transform shipTransform, ThreatLevel threatLevel)
+    void OnDisable()
     {
-        string statusMessage = $"Hailed {shipTransform.name}: Status is {threatLevel}";
-        statusText.text = statusMessage;
-        
-        yield return new WaitForSeconds(displayTime);
-        
-        // If the text hasn't been changed by another call, clear it
-        if (statusText.text == statusMessage)
+        if (GameManager.Instance != null)
         {
-            statusText.text = "";
+            GameManager.Instance.OnCreditsChanged -= UpdateCreditsText;
+            GameManager.Instance.OnNationHealthChanged -= UpdateNationHealthText;
+            GameManager.Instance.OnGameOver -= ShowGameOverPanel;
+        }
+    }
+
+    private void UpdateCreditsText(int newCredits)
+    {
+        if (creditsText != null)
+        {
+            creditsText.text = $"Credits: {newCredits}";
+        }
+    }
+
+    private void UpdateNationHealthText(int newHealth)
+    {
+        if (nationHealthText != null)
+        {
+            nationHealthText.text = $"Nation Health: {newHealth}%";
+        }
+    }
+
+    public void ShowUpgradePanel(GameObject selectedUnit)
+    {
+        if (upgradePanel != null)
+        {
+            upgradePanel.SetActive(true);
+            if (selectedUnitText != null)
+            {
+                selectedUnitText.text = $"Selected: {selectedUnit.name}";
+            }
+        }
+    }
+
+    public void HideUpgradePanel()
+    {
+        if (upgradePanel != null)
+        {
+            upgradePanel.SetActive(false);
+        }
+    }
+
+    private void ShowGameOverPanel()
+    {
+        if (gameOverPanel != null)
+        {
+            gameOverPanel.SetActive(true);
+            HideUpgradePanel(); // Hide other UI
         }
     }
 }
+
