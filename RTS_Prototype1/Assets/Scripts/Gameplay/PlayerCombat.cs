@@ -1,6 +1,10 @@
 using UnityEngine;
 using System.Linq;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
 [RequireComponent(typeof(ShipMotor), typeof(Weapon), typeof(PlayerUnit))]
 public class PlayerCombat : MonoBehaviour
 {
@@ -8,9 +12,14 @@ public class PlayerCombat : MonoBehaviour
     private Weapon _weapon;
     private Health _attackTarget;
     private UnitState _currentState;
+    private UnitState _previousState;
 
     [Header("Behavior")]
     [SerializeField] private LayerMask obstacleLayers; // Layers that block line of sight
+    
+    // --- Debug ---
+    private float _debugLogCooldown = 1f; 
+    // --- End Debug ---
 
     // Auto-attack
     private float _findTargetCooldown;
@@ -21,11 +30,21 @@ public class PlayerCombat : MonoBehaviour
     {
         _shipMotor = GetComponent<ShipMotor>();
         _weapon = GetComponent<Weapon>();
-        _currentState = UnitState.Idle;
+        SetState(UnitState.Idle);
     }
 
     void Update()
     {
+        // --- Debug ---
+        _debugLogCooldown -= Time.deltaTime;
+        if (_debugLogCooldown <= 0)
+        {
+            Debug.Log($"[{gameObject.name}] State: {_currentState} | Target: {(_attackTarget != null ? _attackTarget.name : "null")}");
+            _debugLogCooldown = 2f; // Log every 2 seconds
+        }
+        // --- End Debug ---
+
+        
         _findTargetCooldown -= Time.deltaTime;
 
         switch (_currentState)
@@ -41,27 +60,50 @@ public class PlayerCombat : MonoBehaviour
             case UnitState.Moving:
                 if (_shipMotor.HasReachedDestination())
                 {
-                    _currentState = UnitState.Idle;
+                    SetState(UnitState.Idle);
+                }
+                break;
+
+            case UnitState.MovingToAttack:
+                if (_attackTarget == null || _attackTarget.IsDead)
+                {
+                    SetState(UnitState.Idle);
+                    _shipMotor.Stop();
+                    _shipMotor.ResetStoppingDistance();
+                    break;
+                }
+
+                // Let the NavMeshAgent handle stopping. Once it has, we attack.
+                if (_shipMotor.HasReachedDestination())
+                {
+                    SetState(UnitState.Attacking);
+                } else {
+                    // Make sure we are still tracking the target
+                    _shipMotor.MoveTo(_attackTarget.transform.position);
                 }
                 break;
 
             case UnitState.Attacking:
                 if (_attackTarget == null || _attackTarget.IsDead)
                 {
-                    _currentState = UnitState.Idle;
+                    SetState(UnitState.Idle);
                     _attackTarget = null;
+                    _shipMotor.ResetStoppingDistance();
                     break;
                 }
 
                 float distance = Vector3.Distance(transform.position, _attackTarget.transform.position);
-                if (distance > _weapon.AttackRange)
+                // Use a small buffer to prevent rapidly switching between states
+                if (distance > _weapon.AttackRange + 2f) 
                 {
-                    // Chase the target
+                    // Target moved out of range, chase it
+                    SetState(UnitState.MovingToAttack);
+                     _shipMotor.SetStoppingDistance(_weapon.AttackRange * 0.9f);
                     _shipMotor.MoveTo(_attackTarget.transform.position);
                 }
                 else
                 {
-                    // In range, stop and check line of sight
+                    // In range, stop and attack
                     _shipMotor.Stop();
 
                     Vector3 direction = (_attackTarget.transform.position - transform.position).normalized;
@@ -80,31 +122,41 @@ public class PlayerCombat : MonoBehaviour
         }
     }
 
+    private void SetState(UnitState newState)
+    {
+        if (_currentState == newState) return;
+
+        _previousState = _currentState;
+        _currentState = newState;
+        Debug.Log($"[{gameObject.name}] State Change: {_previousState} -> {_currentState}");
+
+    }
+
     private bool HasLineOfSight()
     {
         if (_attackTarget == null) return false;
 
-        // Use the weapon's fire point for a more accurate LOS check
-        Transform firePoint = _weapon.firePoint; // Assuming firePoint is public or has a public getter in Weapon.cs
+        Transform firePoint = _weapon.firePoint;
         Vector3 startPoint = firePoint != null ? firePoint.position : transform.position;
+        Vector3 targetPoint = _attackTarget.transform.position;
         
-        RaycastHit hit;
-        Vector3 direction = (_attackTarget.transform.position - startPoint).normalized;
-        
-        if (Physics.Raycast(startPoint, direction, out hit, _weapon.AttackRange, ~0, QueryTriggerInteraction.Ignore))
+        Vector3 direction = (targetPoint - startPoint).normalized;
+        float distance = Vector3.Distance(startPoint, targetPoint);
+
+        // Raycast from the fire point towards the target, considering only obstacle layers.
+        if (Physics.Raycast(startPoint, direction, out RaycastHit hit, distance, obstacleLayers, QueryTriggerInteraction.Ignore))
         {
-            // Check if what we hit is our actual target.
-            if (hit.collider.transform.IsChildOf(_attackTarget.transform) || hit.collider.transform == _attackTarget.transform)
-            {
-                return true; // Clear shot
-            }
+            return false;
         }
-        return false;
+        
+        return true;
     }
+
 
     public void Move(Vector3 destination)
     {
-        _currentState = UnitState.Moving;
+        _shipMotor.ResetStoppingDistance();
+        SetState(UnitState.Moving);
         _attackTarget = null; // Clear attack target on move
         _shipMotor.MoveTo(destination);
     }
@@ -113,8 +165,14 @@ public class PlayerCombat : MonoBehaviour
     {
         if (target != null && !target.IsDead)
         {
+            Debug.Log($"[{gameObject.name}] New Attack Order! Target: {target.name}");
+
             _attackTarget = target;
-            _currentState = UnitState.Attacking;
+            SetState(UnitState.MovingToAttack);
+
+            // Set stopping distance to be within weapon range to avoid ramming
+            _shipMotor.SetStoppingDistance(_weapon.AttackRange * 0.9f);
+            _shipMotor.MoveTo(target.transform.position);
         }
     }
 
@@ -136,40 +194,8 @@ public class PlayerCombat : MonoBehaviour
     }
 
     #region Debugging
-    private void OnDrawGizmosSelected()
-    {
-        if (_weapon == null) return;
+    #if UNITY_EDITOR
 
-        // Draw Aggro Radius
-        Gizmos.color = Color.yellow;
-        Gizmos.DrawWireSphere(transform.position, AggroRadius);
-
-        // Draw Weapon Range
-        Gizmos.color = Color.red;
-        Gizmos.DrawWireSphere(transform.position, _weapon.AttackRange);
-
-        // Draw line of sight
-        if (_attackTarget != null)
-        {
-            if (HasLineOfSight())
-            {
-                Gizmos.color = Color.green;
-            }
-            else
-            {
-                Gizmos.color = Color.magenta;
-            }
-            Gizmos.DrawLine(transform.position, _attackTarget.transform.position);
-        }
-    }
-    
-    // This is expensive, for debug only.
-    private void OnGUI()
-    {
-        if (UnityEditor.Selection.activeGameObject != gameObject) return;
-        
-        Vector3 screenPos = Camera.main.WorldToScreenPoint(transform.position);
-        GUI.Label(new Rect(screenPos.x, Screen.height - screenPos.y, 200, 20), $"State: {_currentState}");
-    }
+    #endif
     #endregion
 }

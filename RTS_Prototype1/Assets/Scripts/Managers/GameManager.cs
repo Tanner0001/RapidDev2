@@ -44,7 +44,7 @@ public class GameManager : MonoBehaviour
         if (_isGameOver) return;
         CurrentCredits += amount;
         OnCreditsChanged?.Invoke(CurrentCredits);
-        Debug.Log($"Added {amount} credits. New balance: {CurrentCredits}");
+
     }
 
     public bool SpendCredits(int amount)
@@ -55,7 +55,7 @@ public class GameManager : MonoBehaviour
         }
         CurrentCredits -= amount;
         OnCreditsChanged?.Invoke(CurrentCredits);
-        Debug.Log($"Spent {amount} credits. New balance: {CurrentCredits}");
+
         return true;
     }
 
@@ -65,7 +65,7 @@ public class GameManager : MonoBehaviour
 
         CurrentNationHealth -= amount;
         OnNationHealthChanged?.Invoke(CurrentNationHealth);
-        Debug.Log($"Nation Health decreased by {amount}. New health: {CurrentNationHealth}");
+
 
         if (CurrentNationHealth <= 0)
         {
@@ -79,7 +79,7 @@ public class GameManager : MonoBehaviour
         if (_isGameOver) return;
 
         _isGameOver = true;
-        Debug.Log("Game Over! The nation has fallen.");
+
         OnGameOver?.Invoke();
         // You could also pause the game here:
         // Time.timeScale = 0;

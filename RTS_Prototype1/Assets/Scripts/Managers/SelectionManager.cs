@@ -82,6 +82,7 @@ public class SelectionManager : MonoBehaviour
             // Ensure we have a combat component to issue attack orders
             if (_selectedPlayerCombat != null && hit.collider.TryGetComponent<Health>(out Health enemyHealth) && hit.collider.GetComponent<UnitFaction>()?.UnitFactionType == Faction.Enemy)
             {
+                Debug.Log($"SelectionManager: Issuing Attack command to {_selectedUnit.name} on target {enemyHealth.name}.");
                 _selectedPlayerCombat.Attack(enemyHealth);
                 return; // Action is to attack, so we're done
             }
@@ -92,6 +93,7 @@ public class SelectionManager : MonoBehaviour
         {
             if (_selectedPlayerCombat != null)
             {
+                Debug.Log($"SelectionManager: Issuing Move command to {_selectedUnit.name} to {hit.point}.");
                 _selectedPlayerCombat.Move(hit.point);
             }
             else
@@ -104,6 +106,7 @@ public class SelectionManager : MonoBehaviour
 
     private void Deselect()
     {
+        Debug.Log("SelectionManager: Deselecting unit.");
         if (_selectedUnit != null)
         {
             _selectedShipMotor.Deselect();

@@ -15,6 +15,6 @@ public class CreateMinimapRenderTexture
         AssetDatabase.CreateAsset(rt, path);
         AssetDatabase.SaveAssets();
         
-        Debug.Log($"Created Render Texture at: {path}");
+
     }
 }

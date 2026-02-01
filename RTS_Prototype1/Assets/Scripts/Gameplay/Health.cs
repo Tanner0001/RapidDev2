@@ -24,7 +24,7 @@ public class Health : MonoBehaviour
 
         _currentHealth -= amount;
         OnDamaged?.Invoke(gameObject, attacker);
-        Debug.Log($"{name} took {amount} damage from {attacker.name}, new health: {_currentHealth}");
+
 
         if (IsDead)
         {
@@ -34,7 +34,7 @@ public class Health : MonoBehaviour
 
     private void Die()
     {
-        Debug.Log($"{name} has been destroyed.");
+
         OnDeath?.Invoke(gameObject);
 
         // Notify GameManager if a civilian ship was destroyed
@@ -58,7 +58,7 @@ public class Health : MonoBehaviour
         }
 
         // The object that died is responsible for destroying itself.
-        // Destroy(gameObject);
+        Destroy(gameObject);
     }
 
     public void IncreaseMaxHealth(float amount)

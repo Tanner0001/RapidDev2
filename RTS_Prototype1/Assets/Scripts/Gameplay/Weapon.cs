@@ -32,19 +32,16 @@ public class Weapon : MonoBehaviour
 
     public void Fire(Health target)
     {
-        if (projectilePrefab == null || firePoint == null)
-        {
-            Debug.LogError($"{name}: Weapon not configured! Projectile or fire point is missing.");
-            return;
-        }
+
 
         if (CanFire())
         {
             _fireCooldown = 1f / fireRate;
+            Debug.Log($"{name}: Firing at {target.name}!");
 
             // --- Debug ---
             Vector3 direction = (target.transform.position - firePoint.position).normalized;
-            Debug.DrawRay(firePoint.position, direction * attackRange, Color.red, 0.5f);
+            // Debug.DrawRay(firePoint.position, direction * attackRange, Color.red, 0.5f);
             // --- End Debug ---
 
             GameObject projectileGO = Instantiate(projectilePrefab, firePoint.position, firePoint.rotation);
@@ -54,11 +51,7 @@ public class Weapon : MonoBehaviour
             {
                 projectile.Initialize(target, damage, ownerFaction, gameObject);
             }
-            else
-            {
-                Debug.LogError($"{name}: Projectile prefab is missing the Projectile component!");
-                Destroy(projectileGO);
-            }
+
         }
     }
 

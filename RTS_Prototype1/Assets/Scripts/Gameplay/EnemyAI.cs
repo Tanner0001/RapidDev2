@@ -20,28 +20,8 @@ public class EnemyAI : MonoBehaviour
     void Awake()
     {
         _shipMotor = GetComponent<ShipMotor>();
-        if (_shipMotor == null)
-        {
-            Debug.LogError($"EnemyAI on {name}: Missing required ShipMotor component. Disabling AI.", this);
-            enabled = false;
-            return;
-        }
-
         _weapon = GetComponent<Weapon>();
-        if (_weapon == null)
-        {
-            Debug.LogError($"EnemyAI on {name}: Missing required Weapon component. Disabling AI.", this);
-            enabled = false;
-            return;
-        }
-
         _health = GetComponent<Health>();
-        if (_health == null)
-        {
-            Debug.LogError($"EnemyAI on {name}: Missing required Health component. Disabling AI.", this);
-            enabled = false;
-            return;
-        }
 
         _health.OnDeath += HandleDeath;
         _health.OnDamaged += HandleDamaged;
@@ -171,7 +151,7 @@ public class EnemyAI : MonoBehaviour
         {
             _currentTarget.OnDeath += OnTargetDeath;
             _currentState = UnitState.Attacking;
-            Debug.Log($"{name} is now targeting {_currentTarget.name}");
+
         }
         else
         {
@@ -202,9 +182,11 @@ public class EnemyAI : MonoBehaviour
         }
     }
     
+
+
     private void HandleDeath(GameObject deadObject)
     {
-        Debug.Log("Enemy AI shutting down.");
+        // Debug.Log("Enemy AI shutting down."); // Was removed
     }
 
     #region Debugging

@@ -10,7 +10,7 @@ public class SoundManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("SoundManager: Duplicate SoundManager found, destroying this one.", this);
+
             Destroy(gameObject);
             return;
         }
@@ -40,7 +40,7 @@ public class SoundManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("SoundManager: explosionSound is not assigned, cannot play sound.", this);
+
         }
     }
 }

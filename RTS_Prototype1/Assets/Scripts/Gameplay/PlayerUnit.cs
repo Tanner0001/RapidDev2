@@ -29,11 +29,11 @@ public class PlayerUnit : MonoBehaviour
         if (GameManager.Instance.SpendCredits(healthUpgradeCost))
         {
             _health.IncreaseMaxHealth(healthUpgradeAmount);
-            Debug.Log($"{name} health upgraded!");
+
         }
         else
         {
-            Debug.Log("Not enough credits for health upgrade.");
+
         }
     }
 
@@ -42,11 +42,11 @@ public class PlayerUnit : MonoBehaviour
         if (GameManager.Instance.SpendCredits(fireRateUpgradeCost))
         {
             _weapon.IncreaseFireRate(fireRateUpgradePercent);
-            Debug.Log($"{name} fire rate upgraded!");
+
         }
         else
         {
-            Debug.Log("Not enough credits for fire rate upgrade.");
+
         }
     }
 
@@ -56,11 +56,11 @@ public class PlayerUnit : MonoBehaviour
         if (GameManager.Instance.SpendCredits(speedUpgradeCost))
         {
             _shipMotor.IncreaseSpeed(speedUpgradeAmount);
-            Debug.Log($"{name} speed upgraded!");
+
         }
         else
         {
-            Debug.Log("Not enough credits for speed upgrade.");
+
         }
     }
 }

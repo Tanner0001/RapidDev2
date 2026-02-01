@@ -10,7 +10,7 @@ public class FXManager : MonoBehaviour
     {
         if (Instance != null && Instance != this)
         {
-            Debug.LogWarning("FXManager: Duplicate FXManager found, destroying this one.", this);
+
             Destroy(gameObject);
             return;
         }
@@ -29,7 +29,7 @@ public class FXManager : MonoBehaviour
         }
         else
         {
-            Debug.LogWarning("FXManager: explosionFXPrefab is not assigned, cannot play effect.", this);
+
         }
     }
 }

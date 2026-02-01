@@ -21,7 +21,7 @@ public class Spawner : MonoBehaviour
     {
         if (cargoShipPrefabs.Count == 0 || cargoSpawnPoints.Count == 0 || homePort == null)
         {
-            Debug.LogError("Spawner: Cargo ship spawning not configured properly.", this);
+            // Debug.LogError removed
         }
         else
         {
@@ -30,7 +30,7 @@ public class Spawner : MonoBehaviour
         
         if (enemyShipPrefabs.Count == 0 || enemySpawnPoints.Count == 0)
         {
-            Debug.LogError("Spawner: Enemy spawning not configured properly.", this);
+            // Debug.LogError removed
         }
         else
         {
@@ -57,7 +57,7 @@ public class Spawner : MonoBehaviour
             }
             else
             {
-                Debug.LogWarning($"Spawner: Spawned cargo ship {prefabToSpawn.name} is missing CargoShipAI component. Destroying.", this);
+
                 Destroy(spawnedShip);
             }
         }
@@ -65,7 +65,7 @@ public class Spawner : MonoBehaviour
 
     private IEnumerator SpawnEnemiesCoroutine()
     {
-        Debug.Log("Enemy spawning coroutine started.");
+
         while (true)
         {
             yield return new WaitForSeconds(enemySpawnInterval);
@@ -74,28 +74,21 @@ public class Spawner : MonoBehaviour
             Transform spawnPoint = enemySpawnPoints[Random.Range(0, enemySpawnPoints.Count)];
             if (spawnPoint == null)
             {
-                Debug.LogError("Spawner: An enemy spawn point in the list is null. Skipping this spawn.", this);
                 continue;
             }
 
             GameObject prefabToSpawn = enemyShipPrefabs[Random.Range(0, enemyShipPrefabs.Count)];
             if (prefabToSpawn == null)
             {
-                Debug.LogError("Spawner: An enemy ship prefab in the list is null. Skipping this spawn.", this);
                 continue;
             }
-
-            // Find a valid position on the NavMesh near the spawn point
             if (NavMesh.SamplePosition(spawnPoint.position, out NavMeshHit hit, 10f, NavMesh.AllAreas))
             {
-                Debug.Log($"Spawner: Attempting to spawn enemy '{prefabToSpawn.name}' at {hit.position}.");
+
                 Instantiate(prefabToSpawn, hit.position, spawnPoint.rotation);
-                Debug.Log($"Spawner: Instantiation of '{prefabToSpawn.name}' complete.");
+
             }
-            else
-            {
-                Debug.LogWarning($"Spawner: Could not find a valid NavMesh position near the enemy spawn point '{spawnPoint.name}'. Please check its position. Skipping this spawn.", this);
-            }
+
         }
     }
 }

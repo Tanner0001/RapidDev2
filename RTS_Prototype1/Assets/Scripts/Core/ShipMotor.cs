@@ -5,11 +5,14 @@ using UnityEngine.AI;
 public class ShipMotor : MonoBehaviour
 {
     private NavMeshAgent _navMeshAgent;
+    private float _defaultStoppingDistance;
+
     [SerializeField] private GameObject selectionRing;
 
     void Awake()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
+        _defaultStoppingDistance = _navMeshAgent.stoppingDistance;
     }
 
     void Start()
@@ -25,8 +28,10 @@ public class ShipMotor : MonoBehaviour
     
     public void Stop()
     {
-        _navMeshAgent.isStopped = true;
-        _navMeshAgent.ResetPath();
+        if (_navMeshAgent.hasPath)
+        {
+            _navMeshAgent.isStopped = true;
+        }
     }
 
     public bool HasReachedDestination()
@@ -42,6 +47,16 @@ public class ShipMotor : MonoBehaviour
             }
         }
         return false;
+    }
+
+    public void SetStoppingDistance(float distance)
+    {
+        _navMeshAgent.stoppingDistance = distance;
+    }
+
+    public void ResetStoppingDistance()
+    {
+        _navMeshAgent.stoppingDistance = _defaultStoppingDistance;
     }
 
     public void Select()

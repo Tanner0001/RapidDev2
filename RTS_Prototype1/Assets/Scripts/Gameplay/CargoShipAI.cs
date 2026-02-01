@@ -34,7 +34,7 @@ public class CargoShipAI : MonoBehaviour
 
     private void ArriveAtPort()
     {
-        Debug.Log($"{name} has arrived at the port!");
+
 
         // Notify GameManager to grant credits
         if (GameManager.Instance != null)

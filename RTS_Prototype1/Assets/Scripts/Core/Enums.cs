@@ -11,6 +11,7 @@ public enum UnitState
 {
     Idle,
     Moving,
+    MovingToAttack, // Added this state
     Patrolling,
     Attacking
 }
