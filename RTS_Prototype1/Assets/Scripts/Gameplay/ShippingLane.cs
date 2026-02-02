@@ -1,8 +1,8 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [System.Serializable]
 public class ShippingLane
 {
-    public Transform StartPoint;
-    public Transform EndPoint;
+    public List<Transform> Waypoints = new List<Transform>();
 }

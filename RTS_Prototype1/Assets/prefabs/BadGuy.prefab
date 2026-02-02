@@ -664,6 +664,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 100
+  creditsOnDeath: 10
 --- !u!114 &5371639831997346815
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -690,7 +691,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Weapon
   attackRange: 300
-  fireRate: 1
+  _fireRate: 1
   damage: 5
   projectilePrefab: {fileID: 5509594054850503094, guid: ec29f369e9a4c3946afddb099a595334, type: 3}
   _firePoint: {fileID: 2918068827428601499}
@@ -707,7 +708,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ea7eb11178fb844af6b26d03a7adcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShipMotor
-  selectionRing: {fileID: 1907841441283996811}
+  selectionColor: {r: 0, g: 0, b: 1, a: 1}
+  targetColor: {r: 1, g: 0, b: 0, a: 1}
 --- !u!114 &2522677470728987989
 MonoBehaviour:
   m_ObjectHideFlags: 0

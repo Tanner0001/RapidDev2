@@ -3,8 +3,12 @@ using System;
 
 public class Health : MonoBehaviour
 {
+    [Header("Stats")]
     [SerializeField] private float maxHealth = 100f;
+    [SerializeField] private int creditsOnDeath = 25;
+    
     private float _currentHealth;
+    private GameObject _lastAttacker;
 
     public event Action<GameObject> OnDeath;
     public event Action<GameObject, GameObject> OnDamaged; // Victim, Attacker
@@ -23,21 +27,29 @@ public class Health : MonoBehaviour
         if (IsDead) return;
 
         _currentHealth -= amount;
+        _lastAttacker = attacker;
         OnDamaged?.Invoke(gameObject, attacker);
 
-
-        if (IsDead)
+        if (_currentHealth <= 0 && !IsDead) // Ensure Die is only called once
         {
-            Die();
+             Die();
         }
     }
 
     private void Die()
     {
-
         OnDeath?.Invoke(gameObject);
 
-        // Notify GameManager if a civilian ship was destroyed
+        // Grant credits if the killer was a player
+        if (_lastAttacker != null && _lastAttacker.GetComponent<PlayerUnit>() != null)
+        {
+            if (GameManager.Instance != null && creditsOnDeath > 0)
+            {
+                GameManager.Instance.AddCredits(creditsOnDeath);
+            }
+        }
+        
+        // Notify GameManager if a civilian ship was destroyed by a player
         UnitFaction faction = GetComponent<UnitFaction>();
         if (faction != null && faction.UnitFactionType == Faction.Civilian)
         {
@@ -67,3 +79,4 @@ public class Health : MonoBehaviour
         _currentHealth += amount; // Also increase current health
     }
 }
+

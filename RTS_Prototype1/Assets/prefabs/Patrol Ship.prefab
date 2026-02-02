@@ -139,6 +139,7 @@ GameObject:
   - component: {fileID: 1748293896531624249}
   - component: {fileID: 742581924955103634}
   - component: {fileID: 693688016819579110}
+  - component: {fileID: 2651129854333620189}
   m_Layer: 6
   m_Name: Patrol Ship
   m_TagString: Player
@@ -206,7 +207,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d4ea7eb11178fb844af6b26d03a7adcc, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ShipMotor
-  selectionRing: {fileID: 6611040400912073219}
+  selectionColor: {r: 0, g: 0, b: 1, a: 0.5882353}
+  targetColor: {r: 1, g: 0, b: 0, a: 0.5176471}
 --- !u!65 &1748045882182453111
 BoxCollider:
   m_ObjectHideFlags: 0
@@ -222,7 +224,7 @@ BoxCollider:
     serializedVersion: 2
     m_Bits: 0
   m_LayerOverridePriority: 0
-  m_IsTrigger: 0
+  m_IsTrigger: 1
   m_ProvidesContacts: 0
   m_Enabled: 1
   serializedVersion: 3
@@ -254,6 +256,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Health
   maxHealth: 100
+  creditsOnDeath: 25
 --- !u!114 &1748293896531624249
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -267,7 +270,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Weapon
   attackRange: 350
-  fireRate: 0.8
+  _fireRate: 1
   damage: 15
   projectilePrefab: {fileID: 5509594054850503094, guid: ec29f369e9a4c3946afddb099a595334, type: 3}
   _firePoint: {fileID: 7223410802697691527}
@@ -305,6 +308,19 @@ MonoBehaviour:
   obstacleLayers:
     serializedVersion: 2
     m_Bits: 0
+--- !u!114 &2651129854333620189
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2487700246414478105}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fc18491a14cef24597ccfcb8aaf867a, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::CollisionDamage
+  damageOnRam: 50
 --- !u!1 &2934589584117472686
 GameObject:
   m_ObjectHideFlags: 0

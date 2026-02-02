@@ -33,9 +33,16 @@ public class GameManager : MonoBehaviour
 
     void Start()
     {
-        // Initial UI update
-        OnCreditsChanged?.Invoke(CurrentCredits);
-        OnNationHealthChanged?.Invoke(CurrentNationHealth);
+        // Find and initialize the UIManager
+        UIManager uiManager = FindFirstObjectByType<UIManager>();
+        if (uiManager != null)
+        {
+            uiManager.Initialize(this);
+        }
+        else
+        {
+            Debug.LogError("GameManager could not find a UIManager in the scene!");
+        }
     }
 
 

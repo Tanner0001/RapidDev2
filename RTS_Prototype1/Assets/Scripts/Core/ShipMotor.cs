@@ -7,17 +7,46 @@ public class ShipMotor : MonoBehaviour
     private NavMeshAgent _navMeshAgent;
     private float _defaultStoppingDistance;
 
-    [SerializeField] private GameObject selectionRing;
+    private Renderer _renderer;
+    private Color _originalColor;
+    private bool _isSelected;
+    private bool _isTargeted;
+
+    [SerializeField] private Color selectionColor = Color.blue;
+    [SerializeField] private Color targetColor = Color.red;
 
     void Awake()
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
+        _renderer = GetComponentInChildren<Renderer>();
+        if (_renderer != null)
+        {
+            _originalColor = _renderer.material.color;
+        }
         _defaultStoppingDistance = _navMeshAgent.stoppingDistance;
     }
 
     void Start()
     {
-        Deselect();
+        UpdateHighlightColor();
+    }
+    
+    void UpdateHighlightColor()
+    {
+        if (_renderer == null) return;
+
+        if (_isTargeted)
+        {
+            _renderer.material.color = targetColor;
+        }
+        else if (_isSelected)
+        {
+            _renderer.material.color = selectionColor;
+        }
+        else
+        {
+            _renderer.material.color = _originalColor;
+        }
     }
 
     public void MoveTo(Vector3 destination)
@@ -61,18 +90,26 @@ public class ShipMotor : MonoBehaviour
 
     public void Select()
     {
-        if (selectionRing != null)
-        {
-            selectionRing.SetActive(true);
-        }
+        _isSelected = true;
+        UpdateHighlightColor();
     }
 
     public void Deselect()
     {
-        if (selectionRing != null)
-        {
-            selectionRing.SetActive(false);
-        }
+        _isSelected = false;
+        UpdateHighlightColor();
+    }
+    
+    public void Target()
+    {
+        _isTargeted = true;
+        UpdateHighlightColor();
+    }
+
+    public void Untarget()
+    {
+        _isTargeted = false;
+        UpdateHighlightColor();
     }
 
     public void IncreaseSpeed(float amount)
@@ -80,4 +117,5 @@ public class ShipMotor : MonoBehaviour
         _navMeshAgent.speed += amount;
     }
 }
+
 

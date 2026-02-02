@@ -1,10 +1,12 @@
 using UnityEngine;
+using System.Collections.Generic;
 
 [RequireComponent(typeof(ShipMotor))]
 public class CargoShipAI : MonoBehaviour
 {
     private ShipMotor _shipMotor;
-    private Transform _destination;
+    private ShippingLane _shippingLane;
+    private int _currentWaypointIndex;
     private bool _isInitialized = false;
 
     private const float ArrivalThreshold = 5.0f;
@@ -14,28 +16,50 @@ public class CargoShipAI : MonoBehaviour
         _shipMotor = GetComponent<ShipMotor>();
     }
 
-    public void Initialize(Transform destination)
+    public void Initialize(ShippingLane lane)
     {
-        _destination = destination;
-        _shipMotor.MoveTo(_destination.position);
+        if (lane == null || lane.Waypoints.Count == 0)
+        {
+            Debug.LogError("Failed to initialize CargoShipAI: Shipping lane is invalid.", gameObject);
+            Destroy(gameObject);
+            return;
+        }
+
+        _shippingLane = lane;
+        _currentWaypointIndex = 0;
+        
+        // The spawner now places the ship at the first waypoint.
+        // We just need to start moving towards it.
+        Transform startingWaypoint = _shippingLane.Waypoints[_currentWaypointIndex];
+        _shipMotor.MoveTo(startingWaypoint.position);
         _isInitialized = true;
     }
 
     void Update()
     {
-        if (!_isInitialized || _destination == null) return;
+        if (!_isInitialized) return;
 
-        // Check if the cargo ship has reached the home port
-        if (Vector3.Distance(transform.position, _destination.position) < ArrivalThreshold)
+        // Check if the cargo ship has reached the current waypoint
+        if (_shipMotor.HasReachedDestination())
         {
-            ArriveAtPort();
+            _currentWaypointIndex++;
+            
+            // Check if we have reached the end of the lane
+            if (_currentWaypointIndex >= _shippingLane.Waypoints.Count)
+            {
+                ArriveAtPort();
+            }
+            else
+            {
+                // Set the next waypoint as the destination
+                Transform nextWaypoint = _shippingLane.Waypoints[_currentWaypointIndex];
+                _shipMotor.MoveTo(nextWaypoint.position);
+            }
         }
     }
 
     private void ArriveAtPort()
     {
-
-
         // Notify GameManager to grant credits
         if (GameManager.Instance != null)
         {
@@ -46,3 +70,4 @@ public class CargoShipAI : MonoBehaviour
         Destroy(gameObject);
     }
 }
+

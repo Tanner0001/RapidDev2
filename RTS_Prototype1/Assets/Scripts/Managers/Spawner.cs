@@ -7,8 +7,7 @@ public class Spawner : MonoBehaviour
 {
     [Header("Cargo Ships")]
     [SerializeField] private List<GameObject> cargoShipPrefabs;
-    [SerializeField] private List<Transform> cargoSpawnPoints;
-    [SerializeField] private Transform homePort;
+    [SerializeField] private List<ShippingLane> shippingLanes;
     [SerializeField] private float cargoSpawnInterval = 15f;
 
     [Header("Enemies")]
@@ -19,7 +18,7 @@ public class Spawner : MonoBehaviour
 
     void Start()
     {
-        if (cargoShipPrefabs.Count == 0 || cargoSpawnPoints.Count == 0 || homePort == null)
+        if (cargoShipPrefabs.Count == 0 || shippingLanes.Count == 0)
         {
             // Debug.LogError removed
         }
@@ -44,20 +43,27 @@ public class Spawner : MonoBehaviour
         {
             yield return new WaitForSeconds(cargoSpawnInterval);
 
-            // Pick a random spawn point and prefab
-            Transform spawnPoint = cargoSpawnPoints[Random.Range(0, cargoSpawnPoints.Count)];
-            GameObject prefabToSpawn = cargoShipPrefabs[Random.Range(0, cargoShipPrefabs.Count)];
+            // Pick a random lane and prefab
+            ShippingLane lane = shippingLanes[Random.Range(0, shippingLanes.Count)];
+            if (lane == null || lane.Waypoints.Count == 0)
+            {
+                Debug.LogWarning("Skipping cargo ship spawn because a shipping lane is invalid.");
+                continue;
+            }
 
-            // Spawn and initialize
-            GameObject spawnedShip = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation);
+            GameObject prefabToSpawn = cargoShipPrefabs[Random.Range(0, cargoShipPrefabs.Count)];
+            Transform spawnPoint = lane.Waypoints[0];
+
+            // Spawn at the first waypoint of the lane
+            GameObject spawnedShip = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation); 
             CargoShipAI cargoAI = spawnedShip.GetComponent<CargoShipAI>();
             if (cargoAI != null)
             {
-                cargoAI.Initialize(homePort);
+                cargoAI.Initialize(lane);
             }
             else
             {
-
+                Debug.LogError($"Prefab {prefabToSpawn.name} is missing CargoShipAI component.", spawnedShip);
                 Destroy(spawnedShip);
             }
         }

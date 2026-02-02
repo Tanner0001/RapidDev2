@@ -1,5 +1,6 @@
 using UnityEngine;
 using TMPro;
+using UnityEngine.AI;
 
 public class UIManager : MonoBehaviour
 {
@@ -12,9 +13,16 @@ public class UIManager : MonoBehaviour
     [Header("Selection & Upgrades")]
     [SerializeField] private GameObject upgradePanel;
     [SerializeField] private TextMeshProUGUI selectedUnitText;
+    [SerializeField] private TextMeshProUGUI unitHealthText;
+    [SerializeField] private TextMeshProUGUI unitFireRateText;
+    [SerializeField] private TextMeshProUGUI unitSpeedText;
+
 
     [Header("Game Over UI")]
     [SerializeField] private GameObject gameOverPanel;
+
+    private GameManager _gameManager;
+    private PlayerUnit _currentSelectedUnit;
 
     void Awake()
     {
@@ -30,23 +38,31 @@ public class UIManager : MonoBehaviour
         if(gameOverPanel != null) gameOverPanel.SetActive(false);
     }
 
-    void OnEnable()
+    public void Initialize(GameManager gameManager)
     {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.OnCreditsChanged += UpdateCreditsText;
-            GameManager.Instance.OnNationHealthChanged += UpdateNationHealthText;
-            GameManager.Instance.OnGameOver += ShowGameOverPanel;
-        }
+        _gameManager = gameManager;
+        
+        _gameManager.OnCreditsChanged += UpdateCreditsText;
+        _gameManager.OnNationHealthChanged += UpdateNationHealthText;
+        _gameManager.OnGameOver += ShowGameOverPanel;
+
+        // Immediately update UI with initial values
+        UpdateCreditsText(_gameManager.CurrentCredits);
+        UpdateNationHealthText(_gameManager.CurrentNationHealth);
     }
 
-    void OnDisable()
+    private void OnDestroy()
     {
-        if (GameManager.Instance != null)
+        if (_gameManager != null)
         {
-            GameManager.Instance.OnCreditsChanged -= UpdateCreditsText;
-            GameManager.Instance.OnNationHealthChanged -= UpdateNationHealthText;
-            GameManager.Instance.OnGameOver -= ShowGameOverPanel;
+            _gameManager.OnCreditsChanged -= UpdateCreditsText;
+            _gameManager.OnNationHealthChanged -= UpdateNationHealthText;
+            _gameManager.OnGameOver -= ShowGameOverPanel;
+        }
+        // Ensure we unsubscribe if the UI Manager is destroyed while a unit is selected
+        if (_currentSelectedUnit != null)
+        {
+            _currentSelectedUnit.OnStatsChanged -= UpdateStatsPanel;
         }
     }
 
@@ -66,23 +82,65 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowUpgradePanel(GameObject selectedUnit)
+    public void ShowUpgradePanel(GameObject selectedUnitGO)
     {
-        if (upgradePanel != null)
+        if (upgradePanel == null) return;
+        
+        // Unsubscribe from the old unit if there was one
+        if (_currentSelectedUnit != null)
         {
+            _currentSelectedUnit.OnStatsChanged -= UpdateStatsPanel;
+        }
+
+        _currentSelectedUnit = selectedUnitGO.GetComponent<PlayerUnit>();
+
+        // Subscribe to the new unit's event and show the panel
+        if (_currentSelectedUnit != null)
+        {
+            _currentSelectedUnit.OnStatsChanged += UpdateStatsPanel;
             upgradePanel.SetActive(true);
-            if (selectedUnitText != null)
-            {
-                selectedUnitText.text = $"Selected: {selectedUnit.name}";
-            }
+            UpdateStatsPanel(); // Initial update
         }
     }
 
     public void HideUpgradePanel()
     {
-        if (upgradePanel != null)
+        if (upgradePanel == null) return;
+        
+        upgradePanel.SetActive(false);
+        if (_currentSelectedUnit != null)
         {
-            upgradePanel.SetActive(false);
+            _currentSelectedUnit.OnStatsChanged -= UpdateStatsPanel;
+            _currentSelectedUnit = null;
+        }
+    }
+
+    private void UpdateStatsPanel()
+    {
+        if (_currentSelectedUnit == null) return;
+
+        if (selectedUnitText != null)
+        {
+            selectedUnitText.text = $"Selected: {_currentSelectedUnit.name}";
+        }
+
+        // Update stats
+        Health health = _currentSelectedUnit.GetComponent<Health>();
+        if (unitHealthText != null && health != null)
+        {
+            unitHealthText.text = $"Health: {health.CurrentHealth:F0} / {health.MaxHealth:F0}";
+        }
+
+        Weapon weapon = _currentSelectedUnit.GetComponent<Weapon>();
+        if (unitFireRateText != null && weapon != null)
+        {
+            unitFireRateText.text = $"Fire Rate: {weapon.fireRate:F2}/s";
+        }
+
+        NavMeshAgent navAgent = _currentSelectedUnit.GetComponent<NavMeshAgent>();
+        if (unitSpeedText != null && navAgent != null)
+        {
+            unitSpeedText.text = $"Speed: {navAgent.speed:F1} m/s";
         }
     }
 

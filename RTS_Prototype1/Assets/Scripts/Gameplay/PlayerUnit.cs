@@ -1,8 +1,11 @@
 using UnityEngine;
+using System;
 
 [RequireComponent(typeof(Health), typeof(Weapon), typeof(ShipMotor))]
 public class PlayerUnit : MonoBehaviour
 {
+    public event Action OnStatsChanged;
+
     private Health _health;
     private Weapon _weapon;
     private ShipMotor _shipMotor;
@@ -29,7 +32,7 @@ public class PlayerUnit : MonoBehaviour
         if (GameManager.Instance.SpendCredits(healthUpgradeCost))
         {
             _health.IncreaseMaxHealth(healthUpgradeAmount);
-
+            OnStatsChanged?.Invoke();
         }
         else
         {
@@ -42,7 +45,7 @@ public class PlayerUnit : MonoBehaviour
         if (GameManager.Instance.SpendCredits(fireRateUpgradeCost))
         {
             _weapon.IncreaseFireRate(fireRateUpgradePercent);
-
+            OnStatsChanged?.Invoke();
         }
         else
         {
@@ -56,7 +59,7 @@ public class PlayerUnit : MonoBehaviour
         if (GameManager.Instance.SpendCredits(speedUpgradeCost))
         {
             _shipMotor.IncreaseSpeed(speedUpgradeAmount);
-
+            OnStatsChanged?.Invoke();
         }
         else
         {
@@ -64,3 +67,4 @@ public class PlayerUnit : MonoBehaviour
         }
     }
 }
+

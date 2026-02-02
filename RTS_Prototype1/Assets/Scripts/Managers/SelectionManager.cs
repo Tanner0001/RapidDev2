@@ -1,5 +1,6 @@
 using UnityEngine;
 using UnityEngine.InputSystem;
+using UnityEngine.EventSystems;
 
 public class SelectionManager : MonoBehaviour
 {
@@ -14,6 +15,7 @@ public class SelectionManager : MonoBehaviour
     private PlayerUnit _selectedUnit;
     private ShipMotor _selectedShipMotor;
     private PlayerCombat _selectedPlayerCombat;
+    private ShipMotor _currentTargetMotor;
 
     void Awake()
     {
@@ -28,6 +30,12 @@ public class SelectionManager : MonoBehaviour
 
     void Update()
     {
+        // Ignore clicks over UI elements
+        if (EventSystem.current.IsPointerOverGameObject())
+        {
+            return;
+        }
+
         // --- Left Click: Selection ---
         if (Mouse.current.leftButton.wasPressedThisFrame)
         {
@@ -82,8 +90,18 @@ public class SelectionManager : MonoBehaviour
             // Ensure we have a combat component to issue attack orders
             if (_selectedPlayerCombat != null && hit.collider.TryGetComponent<Health>(out Health enemyHealth) && hit.collider.GetComponent<UnitFaction>()?.UnitFactionType == Faction.Enemy)
             {
+                if (_currentTargetMotor != null)
+                {
+                    _currentTargetMotor.Untarget();
+                }
+                
                 Debug.Log($"SelectionManager: Issuing Attack command to {_selectedUnit.name} on target {enemyHealth.name}.");
                 _selectedPlayerCombat.Attack(enemyHealth);
+                _currentTargetMotor = enemyHealth.GetComponent<ShipMotor>();
+                if (_currentTargetMotor != null)
+                {
+                    _currentTargetMotor.Target();
+                }
                 return; // Action is to attack, so we're done
             }
         }
@@ -93,6 +111,11 @@ public class SelectionManager : MonoBehaviour
         {
             if (_selectedPlayerCombat != null)
             {
+                if (_currentTargetMotor != null)
+                {
+                    _currentTargetMotor.Untarget();
+                    _currentTargetMotor = null;
+                }
                 Debug.Log($"SelectionManager: Issuing Move command to {_selectedUnit.name} to {hit.point}.");
                 _selectedPlayerCombat.Move(hit.point);
             }
@@ -118,6 +141,12 @@ public class SelectionManager : MonoBehaviour
             {
                 UIManager.Instance.HideUpgradePanel();
             }
+        }
+        
+        if (_currentTargetMotor != null)
+        {
+            _currentTargetMotor.Untarget();
+            _currentTargetMotor = null;
         }
     }
 

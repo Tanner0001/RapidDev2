@@ -4,7 +4,8 @@ public class Weapon : MonoBehaviour
 {
     [Header("Attributes")]
     [SerializeField] private float attackRange = 30f;
-    [SerializeField] private float fireRate = 1f; // shots per second
+    [SerializeField] private float _fireRate = 1f; // shots per second
+    public float fireRate { get { return _fireRate; } private set { _fireRate = value; } }
     [SerializeField] private int damage = 10;
     
     [Header("Setup")]
