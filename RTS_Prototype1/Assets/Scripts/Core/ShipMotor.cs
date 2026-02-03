@@ -11,6 +11,7 @@ public class ShipMotor : MonoBehaviour
     private Color _originalColor;
     private bool _isSelected;
     private bool _isTargeted;
+    private MaterialPropertyBlock _propBlock; // For per-instance material properties
 
     [SerializeField] private Color selectionColor = Color.blue;
     [SerializeField] private Color targetColor = Color.red;
@@ -19,9 +20,12 @@ public class ShipMotor : MonoBehaviour
     {
         _navMeshAgent = GetComponent<NavMeshAgent>();
         _renderer = GetComponentInChildren<Renderer>();
+        _propBlock = new MaterialPropertyBlock();
+
         if (_renderer != null)
         {
-            _originalColor = _renderer.material.color;
+            _renderer.GetPropertyBlock(_propBlock); // Get the current property block
+            _originalColor = _propBlock.GetColor("_Color"); // Assuming the main color property is "_Color"
         }
         _defaultStoppingDistance = _navMeshAgent.stoppingDistance;
     }
@@ -35,18 +39,22 @@ public class ShipMotor : MonoBehaviour
     {
         if (_renderer == null) return;
 
+        _renderer.GetPropertyBlock(_propBlock); // Always get the current block to modify it
+
         if (_isTargeted)
         {
-            _renderer.material.color = targetColor;
+            _propBlock.SetColor("_Color", targetColor);
         }
         else if (_isSelected)
         {
-            _renderer.material.color = selectionColor;
+            _propBlock.SetColor("_Color", selectionColor);
         }
         else
         {
-            _renderer.material.color = _originalColor;
+            _propBlock.SetColor("_Color", _originalColor);
         }
+
+        _renderer.SetPropertyBlock(_propBlock); // Apply the modified block
     }
 
     public void MoveTo(Vector3 destination)

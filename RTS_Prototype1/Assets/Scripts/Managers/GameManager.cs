@@ -17,6 +17,7 @@ public class GameManager : MonoBehaviour
     public event Action OnGameOver;
 
     private bool _isGameOver = false;
+    public float GameTime { get; private set; }
 
     void Awake()
     {
@@ -29,6 +30,14 @@ public class GameManager : MonoBehaviour
 
         CurrentCredits = startingCredits;
         CurrentNationHealth = startingNationHealth;
+    }
+
+    void Update()
+    {
+        if (!_isGameOver)
+        {
+            GameTime += Time.deltaTime;
+        }
     }
 
     void Start()

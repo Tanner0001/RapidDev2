@@ -153,4 +153,4 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Projectile
   speed: 100
-  hitEffect: {fileID: 1007127540951276732, guid: 3ace37360f306cb4aac03640550fa9ef, type: 3}
+  hitEffect: {fileID: 236612565842741306, guid: 1936d835a7a861d4395da1e90469a218, type: 3}

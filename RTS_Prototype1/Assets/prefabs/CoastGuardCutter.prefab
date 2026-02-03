@@ -16,6 +16,7 @@ GameObject:
   - component: {fileID: 914977476879369956}
   - component: {fileID: 2488345487553774603}
   - component: {fileID: 6074002407278774224}
+  - component: {fileID: 5768909168646572959}
   m_Layer: 6
   m_Name: CoastGuardCutter
   m_TagString: Untagged
@@ -348,3 +349,30 @@ Transform:
   m_CorrespondingSourceObject: {fileID: -8679921383154817045, guid: 4e55c1492d346f54c8dbfd5719d50c9f, type: 3}
   m_PrefabInstance: {fileID: 1152124340436539956}
   m_PrefabAsset: {fileID: 0}
+--- !u!54 &5768909168646572959
+Rigidbody:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1375795125410842215}
+  serializedVersion: 5
+  m_Mass: 1
+  m_LinearDamping: 0
+  m_AngularDamping: 0.05
+  m_CenterOfMass: {x: 0, y: 0, z: 0}
+  m_InertiaTensor: {x: 1, y: 1, z: 1}
+  m_InertiaRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_IncludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ExcludeLayers:
+    serializedVersion: 2
+    m_Bits: 0
+  m_ImplicitCom: 1
+  m_ImplicitTensor: 1
+  m_UseGravity: 0
+  m_IsKinematic: 1
+  m_Interpolate: 0
+  m_Constraints: 0
+  m_CollisionDetection: 0

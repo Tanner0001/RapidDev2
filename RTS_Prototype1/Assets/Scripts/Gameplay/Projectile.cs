@@ -50,6 +50,7 @@ public class Projectile : MonoBehaviour
             {
                 Instantiate(hitEffect, transform.position, Quaternion.identity);
             }
+            SoundManager.Instance.PlayExplosionSound(transform.position);
             Destroy(gameObject);
         }
     }

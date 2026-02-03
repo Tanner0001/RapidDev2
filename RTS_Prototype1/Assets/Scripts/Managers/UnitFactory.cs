@@ -33,6 +33,7 @@ public class UnitFactory : MonoBehaviour
 
             Instantiate(unitData.unitPrefab, spawnPoint.position, spawnPoint.rotation);
             Debug.Log($"Built {unitData.unitName} for {unitData.cost} credits.");
+            SoundManager.Instance.PlayUnitBuiltSound();
             return true;
         }
         else

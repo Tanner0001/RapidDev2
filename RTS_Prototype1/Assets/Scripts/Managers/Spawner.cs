@@ -54,17 +54,25 @@ public class Spawner : MonoBehaviour
             GameObject prefabToSpawn = cargoShipPrefabs[Random.Range(0, cargoShipPrefabs.Count)];
             Transform spawnPoint = lane.Waypoints[0];
 
-            // Spawn at the first waypoint of the lane
-            GameObject spawnedShip = Instantiate(prefabToSpawn, spawnPoint.position, spawnPoint.rotation); 
-            CargoShipAI cargoAI = spawnedShip.GetComponent<CargoShipAI>();
-            if (cargoAI != null)
+            // Ensure the spawn point is on the NavMesh
+            if (NavMesh.SamplePosition(spawnPoint.position, out NavMeshHit hit, 10f, NavMesh.AllAreas))
             {
-                cargoAI.Initialize(lane);
+                // Spawn at the first waypoint of the lane
+                GameObject spawnedShip = Instantiate(prefabToSpawn, hit.position, spawnPoint.rotation);
+                CargoShipAI cargoAI = spawnedShip.GetComponent<CargoShipAI>();
+                if (cargoAI != null)
+                {
+                    cargoAI.Initialize(lane);
+                }
+                else
+                {
+                    Debug.LogError($"Prefab {prefabToSpawn.name} is missing CargoShipAI component.", spawnedShip);
+                    Destroy(spawnedShip);
+                }
             }
             else
             {
-                Debug.LogError($"Prefab {prefabToSpawn.name} is missing CargoShipAI component.", spawnedShip);
-                Destroy(spawnedShip);
+                Debug.LogWarning($"Could not find a valid NavMesh position near spawn point for lane {lane.name}.");
             }
         }
     }
@@ -90,9 +98,16 @@ public class Spawner : MonoBehaviour
             }
             if (NavMesh.SamplePosition(spawnPoint.position, out NavMeshHit hit, 10f, NavMesh.AllAreas))
             {
+                // Calculate difficulty based on game time (e.g., enemies get tougher over time)
+                float difficultyMultiplier = 1.0f + (GameManager.Instance.GameTime / 300.0f); //+100% health every 5 mins
 
-                Instantiate(prefabToSpawn, hit.position, spawnPoint.rotation);
-
+                GameObject spawnedEnemy = Instantiate(prefabToSpawn, hit.position, spawnPoint.rotation);
+                
+                Health health = spawnedEnemy.GetComponent<Health>();
+                if (health != null)
+                {
+                    health.ApplyDifficultyScaling(difficultyMultiplier);
+                }
             }
 
         }

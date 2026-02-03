@@ -13,16 +13,6 @@ public class BuildButton : MonoBehaviour
     {
         _button = GetComponent<Button>();
         _button.onClick.AddListener(OnButtonClicked);
-
-        // Optional: Set button image from UnitData
-        if (unitToBuild != null && unitToBuild.icon != null)
-        {
-            Image image = GetComponent<Image>();
-            if (image != null)
-            {
-                image.sprite = unitToBuild.icon;
-            }
-        }
     }
 
     private void OnButtonClicked()

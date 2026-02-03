@@ -12,6 +12,7 @@ public class Health : MonoBehaviour
 
     public event Action<GameObject> OnDeath;
     public event Action<GameObject, GameObject> OnDamaged; // Victim, Attacker
+    public event Action<GameObject> OnRepaired;
 
     public float CurrentHealth => _currentHealth;
     public float MaxHealth => maxHealth;
@@ -30,14 +31,34 @@ public class Health : MonoBehaviour
         _lastAttacker = attacker;
         OnDamaged?.Invoke(gameObject, attacker);
 
-        if (_currentHealth <= 0 && !IsDead) // Ensure Die is only called once
+        if (_currentHealth <= 0) // Ensure Die is only called once
         {
              Die();
         }
     }
+    
+    public void Repair(float amount)
+    {
+        if (IsDead || _currentHealth >= maxHealth) return;
+
+        _currentHealth += amount;
+        if (_currentHealth > maxHealth)
+        {
+            _currentHealth = maxHealth;
+        }
+
+        OnRepaired?.Invoke(gameObject);
+    }
 
     private void Die()
     {
+        // If this is a cargo ship, it should just despawn without fanfare.
+        if (GetComponent<CargoShipAI>() != null)
+        {
+            Destroy(gameObject);
+            return;
+        }
+        
         OnDeath?.Invoke(gameObject);
 
         // Grant credits if the killer was a player
@@ -77,6 +98,12 @@ public class Health : MonoBehaviour
     {
         maxHealth += amount;
         _currentHealth += amount; // Also increase current health
+    }
+
+    public void ApplyDifficultyScaling(float multiplier)
+    {
+        maxHealth *= multiplier;
+        _currentHealth = maxHealth;
     }
 }
 

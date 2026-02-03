@@ -39,6 +39,8 @@ public class Weapon : MonoBehaviour
         {
             _fireCooldown = 1f / fireRate;
             Debug.Log($"{name}: Firing at {target.name}!");
+            
+            SoundManager.Instance.PlayWeaponFireSound(firePoint.position);
 
             // --- Debug ---
             Vector3 direction = (target.transform.position - firePoint.position).normalized;

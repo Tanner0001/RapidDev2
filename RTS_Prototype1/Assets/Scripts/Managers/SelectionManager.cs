@@ -69,6 +69,7 @@ public class SelectionManager : MonoBehaviour
                 {
                     UIManager.Instance.ShowUpgradePanel(_selectedUnit.gameObject);
                 }
+                SoundManager.Instance.PlaySelectionSound();
             }
         }
         else
@@ -102,6 +103,7 @@ public class SelectionManager : MonoBehaviour
                 {
                     _currentTargetMotor.Target();
                 }
+                SoundManager.Instance.PlayAttackCommandSound();
                 return; // Action is to attack, so we're done
             }
         }
@@ -118,11 +120,13 @@ public class SelectionManager : MonoBehaviour
                 }
                 Debug.Log($"SelectionManager: Issuing Move command to {_selectedUnit.name} to {hit.point}.");
                 _selectedPlayerCombat.Move(hit.point);
+                // SoundManager.Instance.PlayMoveCommandSound();
             }
             else
             {
                 // Fallback for non-combat units, though player units should have PlayerCombat
                 _selectedShipMotor.MoveTo(hit.point);
+                SoundManager.Instance.PlayMoveCommandSound();
             }
         }
     }
@@ -139,7 +143,7 @@ public class SelectionManager : MonoBehaviour
 
             if (UIManager.Instance != null)
             {
-                UIManager.Instance.HideUpgradePanel();
+                // UIManager.Instance.HideUpgradePanel();
             }
         }
         

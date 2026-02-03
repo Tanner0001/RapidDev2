@@ -23,6 +23,7 @@ public class UIManager : MonoBehaviour
 
     private GameManager _gameManager;
     private PlayerUnit _currentSelectedUnit;
+    private Health _currentSelectedUnitHealth;
 
     void Awake()
     {
@@ -64,6 +65,11 @@ public class UIManager : MonoBehaviour
         {
             _currentSelectedUnit.OnStatsChanged -= UpdateStatsPanel;
         }
+        if (_currentSelectedUnitHealth != null)
+        {
+            _currentSelectedUnitHealth.OnDamaged -= HandleUnitDamaged;
+            _currentSelectedUnitHealth.OnRepaired -= HandleUnitRepaired;
+        }
     }
 
     private void UpdateCreditsText(int newCredits)
@@ -91,13 +97,24 @@ public class UIManager : MonoBehaviour
         {
             _currentSelectedUnit.OnStatsChanged -= UpdateStatsPanel;
         }
+        if (_currentSelectedUnitHealth != null)
+        {
+            _currentSelectedUnitHealth.OnDamaged -= HandleUnitDamaged;
+            _currentSelectedUnitHealth.OnRepaired -= HandleUnitRepaired;
+        }
 
         _currentSelectedUnit = selectedUnitGO.GetComponent<PlayerUnit>();
+        _currentSelectedUnitHealth = selectedUnitGO.GetComponent<Health>();
 
         // Subscribe to the new unit's event and show the panel
         if (_currentSelectedUnit != null)
         {
             _currentSelectedUnit.OnStatsChanged += UpdateStatsPanel;
+            if (_currentSelectedUnitHealth != null)
+            {
+                _currentSelectedUnitHealth.OnDamaged += HandleUnitDamaged;
+                _currentSelectedUnitHealth.OnRepaired += HandleUnitRepaired;
+            }
             upgradePanel.SetActive(true);
             UpdateStatsPanel(); // Initial update
         }
@@ -113,6 +130,22 @@ public class UIManager : MonoBehaviour
             _currentSelectedUnit.OnStatsChanged -= UpdateStatsPanel;
             _currentSelectedUnit = null;
         }
+        if (_currentSelectedUnitHealth != null)
+        {
+            _currentSelectedUnitHealth.OnDamaged -= HandleUnitDamaged;
+            _currentSelectedUnitHealth.OnRepaired -= HandleUnitRepaired;
+            _currentSelectedUnitHealth = null;
+        }
+    }
+    
+    private void HandleUnitDamaged(GameObject victim, GameObject attacker)
+    {
+        UpdateStatsPanel();
+    }
+
+    private void HandleUnitRepaired(GameObject ship)
+    {
+        UpdateStatsPanel();
     }
 
     private void UpdateStatsPanel()

@@ -42,24 +42,23 @@ public class CargoShipAI : MonoBehaviour
         // Check if the cargo ship has reached the current waypoint
         if (_shipMotor.HasReachedDestination())
         {
-            _currentWaypointIndex++;
-            
-            // Check if we have reached the end of the lane
-            if (_currentWaypointIndex >= _shippingLane.Waypoints.Count)
+            if (_currentWaypointIndex < _shippingLane.Waypoints.Count - 1)
             {
-                ArriveAtPort();
+                _currentWaypointIndex++;
+                Transform nextWaypoint = _shippingLane.Waypoints[_currentWaypointIndex];
+                _shipMotor.MoveTo(nextWaypoint.position);
             }
             else
             {
-                // Set the next waypoint as the destination
-                Transform nextWaypoint = _shippingLane.Waypoints[_currentWaypointIndex];
-                _shipMotor.MoveTo(nextWaypoint.position);
+                // Reached the last waypoint, immediately "delete" the ship.
+                ArriveAtPort();
             }
         }
     }
 
-    private void ArriveAtPort()
+    public void ArriveAtPort()
     {
+        Debug.Log($"{name}: Arrived at port. Despawning.");
         // Notify GameManager to grant credits
         if (GameManager.Instance != null)
         {
